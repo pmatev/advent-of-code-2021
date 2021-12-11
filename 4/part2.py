@@ -7,17 +7,26 @@ def main():
     with open(sys.argv[1], 'r') as f:  
         input, boards = _parse_input(f)
 
-    for num in input:
-        for i, board in enumerate(boards):
+    winners: List[Tuple[int, Board]] = []
+
+    for i, num in enumerate(input):
+        if len(winners) == len(boards):
+            break
+
+        for board in boards:
+            if board in [b for _, b in winners]:
+                continue
+
             board.mark(num)
             
             if board.complete():
-                print(board)
-                print(num)
-                sum = board.sum_unmarked()
-                print(sum)
-                print(num * sum)
-                return
+                winners.append((num, board))
+                continue
+
+    num, board = winners[-1]
+    print(num, board.sum_unmarked())
+    print(num * board.sum_unmarked())
+
 
 class Board:
     def __init__(self, cells: List[List[int]]) -> None:
@@ -25,6 +34,7 @@ class Board:
         assert len(cells[0]) == 5
         self.cells = cells
         self.matched_cells: Set[Tuple[int, int]] = set()
+        self.completed = False
 
     def __str__(self) -> str:
         return '\n'.join([
@@ -34,7 +44,10 @@ class Board:
 
     def _print_cell(self, cell, index) -> str:
         if index in self.matched_cells:
-            return colored(f'{cell:02}', 'green')
+            if self.completed:
+                return colored(f'{cell:02}', 'yellow')
+            else:
+                return colored(f'{cell:02}', 'green')
         else:
             return f'{cell:02}'
     
@@ -56,12 +69,14 @@ class Board:
         for row_idx in range(5):
             matched_row = len([(x, y) for (x, y) in self.matched_cells if x == row_idx]) == 5
             if matched_row:
+                self.completed = True
                 return True
         
         # check cols
         for col_idx in range(5):
             matched_col = len([(x, y) for (x, y) in self.matched_cells if y == col_idx]) == 5
             if matched_col:
+                self.completed = True
                 return True
         
         return False
@@ -77,7 +92,7 @@ class Board:
         
 
 def _parse_input(file) -> Tuple[List[int], List[Board]]:
-    lines = file.readlines()
+    lines = [line.rstrip() for line in file.readlines()]
     input = [int(x) for x in lines[0].split(',')]
     boards = []
 
@@ -85,7 +100,7 @@ def _parse_input(file) -> Tuple[List[int], List[Board]]:
         board = []
         for j in range(5):
             line = lines[i+j]
-            board.append(_parse_board_line(line.rstrip()))
+            board.append(_parse_board_line(line))
         
         boards.append(Board(board))
 
@@ -93,6 +108,7 @@ def _parse_input(file) -> Tuple[List[int], List[Board]]:
 
 def _parse_board_line(line: str) -> List[int]:
     values = []
+
     for i in range(0, len(line), 3):
         values.append(int(line[i:i+2]))
     
