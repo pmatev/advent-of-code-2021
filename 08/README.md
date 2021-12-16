@@ -66,3 +66,4 @@ Because the digits 1, 4, 7, and 8 each use a unique number of segments, you shou
 
 In the output values, how many times do digits 1, 4, 7, or 8 appear?
 
+245
