@@ -49,3 +49,4 @@ In the above example, an illegal ) was found twice (2*3 = 6 points), an illegal 
 
 Find the first illegal character in each corrupted line of the navigation subsystem. What is the total syntax error score for those errors?
 
+399153
